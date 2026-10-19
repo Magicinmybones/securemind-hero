@@ -6,6 +6,15 @@
 <meta name="theme-color" content="#fdfdfd">
 <title>SecureMind — AI Security Agent</title>
 <meta name="description" content="Autonomous AI agents that detect threats, prevent data breaches, and keep your business secure 24/7.">
+<script>
+// Establish the first frame before the page can paint; fail open if animation cannot run.
+if (Element.prototype.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  document.documentElement.classList.add('entry-pending');
+  window.__entryFallback = setTimeout(function () {
+    document.documentElement.classList.remove('entry-pending');
+  }, 5000);
+}
+</script>
 <style>
 /* ==========================================================================
    SecureMind — hero
@@ -101,13 +110,47 @@ ul{ list-style:none; }
 .logo-card:hover{ transform:translateY(-3px); }
 .menu-toggle, .menu-panel{ display:none; }
 
-.list li:first-child .dot{ animation:pulse 2.4s ease-in-out infinite; }
-@keyframes pulse{
-  0%,100%{ box-shadow:0 0 0 0 rgba(243,92,23,.0); }
-  50%{ box-shadow:0 0 0 5px rgba(243,92,23,.12); }
-}
 @media (prefers-reduced-motion: reduce){
   *,*::before,*::after{ animation:none !important; transition:none !important; }
+}
+
+/* Entrance-only first frame. Removing entry-pending restores the authored design. */
+.h1-line{ display:block; overflow:hidden; }
+.h1-line > span{ display:block; }
+html.entry-pending .brand,
+html.entry-pending .nav,
+html.entry-pending .signin,
+html.entry-pending .btn-top,
+html.entry-pending .menu-toggle,
+html.entry-pending .eyebrow,
+html.entry-pending .sub,
+html.entry-pending .cta,
+html.entry-pending .proof,
+html.entry-pending .portrait{ opacity:0; }
+html.entry-pending .brand,
+html.entry-pending .nav,
+html.entry-pending .signin,
+html.entry-pending .btn-top,
+html.entry-pending .menu-toggle{ transform:translate3d(0,-7px,0); }
+html.entry-pending .eyebrow,
+html.entry-pending .sub,
+html.entry-pending .cta{ transform:translate3d(0,10px,0); }
+html.entry-pending .h1-line > span{ transform:translate3d(0,108%,0); }
+html.entry-pending .portrait{ transform:translate3d(0,16px,0) scale(.985); }
+@media (min-aspect-ratio: 10/9) and (min-width: 761px) and (min-height: 541px){
+  html.entry-pending .card-agent,
+  html.entry-pending .list,
+  html.entry-pending .card-stat,
+  html.entry-pending .h2,
+  html.entry-pending .tag,
+  html.entry-pending .trust-label,
+  html.entry-pending .logos{ opacity:0; }
+  html.entry-pending .card-agent,
+  html.entry-pending .list,
+  html.entry-pending .card-stat,
+  html.entry-pending .h2,
+  html.entry-pending .tag,
+  html.entry-pending .logos{ transform:translate3d(0,10px,0); }
 }
 
 /* ==========================================================================
@@ -466,7 +509,11 @@ ul{ list-style:none; }
     <div class="hero-top wrap">
       <div class="L col-l row-m hero-l">
         <div class="eyebrow"><span class="pill">AI</span><span class="eyebrow-text">AI-POWERED SECURITY</span></div>
-        <h1 class="h1">AI Security<br>Agent That<br>Protects Data</h1>
+        <h1 class="h1">
+          <span class="h1-line"><span>AI Security</span></span>
+          <span class="h1-line"><span>Agent That</span></span>
+          <span class="h1-line"><span>Protects Data</span></span>
+        </h1>
         <p class="sub">Autonomous AI agents that detect threats,<br class="d-br"> prevent data breaches, and keep your<br class="d-br"> business secure 24/7.</p>
         <a class="cta" href="#">
           <span class="cta-label">Book a Demo</span>
@@ -542,6 +589,81 @@ ul{ list-style:none; }
     b.setAttribute('aria-expanded',open?'true':'false');
     b.setAttribute('aria-label',open?'Close menu':'Open menu');
   });
+})();
+</script>
+<script>
+(function () {
+  if (!document.documentElement.classList.contains('entry-pending')) return;
+
+  var animations = [];
+  var ease = 'cubic-bezier(.22,1,.36,1)';
+  var desktop = matchMedia('(min-aspect-ratio: 10/9) and (min-width: 761px) and (min-height: 541px)').matches;
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)');
+  var finished = false;
+
+  function cleanUp() {
+    if (finished) return;
+    finished = true;
+    clearTimeout(window.__entryFallback);
+    reduce.removeEventListener('change', onMotionChange);
+    document.documentElement.classList.remove('entry-pending');
+    animations.forEach(function (animation) { animation.cancel(); });
+  }
+
+  function onMotionChange(event) {
+    if (event.matches) cleanUp();
+  }
+
+  function add(selector, from, delay, duration) {
+    var element = document.querySelector(selector);
+    if (!element || !element.getClientRects().length) return;
+    animations.push(element.animate([
+      Object.assign({ opacity: 0 }, from),
+      { opacity: 1, transform: 'none' }
+    ], { delay: delay, duration: duration, easing: ease, fill: 'both' }));
+  }
+
+  function run() {
+    if (finished || reduce.matches || !document.documentElement.classList.contains('entry-pending')) { cleanUp(); return; }
+    reduce.addEventListener('change', onMotionChange);
+
+    // Header establishes the frame without competing with the hero.
+    add('.brand', { transform: 'translate3d(0,-7px,0)' }, 80, 520);
+    add('.nav', { transform: 'translate3d(0,-7px,0)' }, 140, 520);
+    add('.signin', { transform: 'translate3d(0,-7px,0)' }, 190, 520);
+    add('.btn-top', { transform: 'translate3d(0,-7px,0)' }, 200, 540);
+    add('.menu-toggle', { transform: 'translate3d(0,-7px,0)' }, 210, 540);
+
+    // Context, then three headline lines, each rising only within its own line.
+    add('.eyebrow', { transform: 'translate3d(0,10px,0)' }, 260, 500);
+    ['.h1-line:nth-child(1) > span', '.h1-line:nth-child(2) > span', '.h1-line:nth-child(3) > span']
+      .forEach(function (selector, index) {
+        add(selector, { transform: 'translate3d(0,108%,0)' }, 380 + index * 110, 820);
+      });
+
+    // The portrait is a foreground image; the page background stays still.
+    add('.portrait', { transform: 'translate3d(0,16px,0) scale(.985)' }, 700, 950);
+    add('.sub', { transform: 'translate3d(0,12px,0)' }, 800, 640);
+    add('.cta', { transform: 'translate3d(0,10px,0)' }, 1050, 570);
+    add('.proof', {}, 1220, 500);
+
+    if (desktop) {
+      add('.card-agent', { transform: 'translate3d(0,10px,0)' }, 1080, 640);
+      add('.list', { transform: 'translate3d(0,8px,0)' }, 1250, 600);
+      add('.card-stat', { transform: 'translate3d(0,10px,0)' }, 1470, 600);
+      add('.h2', { transform: 'translate3d(0,10px,0)' }, 1550, 680);
+      add('.tag', { transform: 'translate3d(0,8px,0)' }, 1730, 520);
+      add('.trust-label', {}, 1790, 460);
+      add('.logos', { transform: 'translate3d(0,8px,0)' }, 1910, 520);
+    }
+
+    Promise.all(animations.map(function (animation) {
+      return animation.finished.catch(function () {});
+    })).then(cleanUp, cleanUp);
+  }
+
+  if (document.readyState === 'complete') run();
+  else window.addEventListener('load', run, { once: true });
 })();
 </script>
 </body>
