@@ -11,7 +11,8 @@
 if (Element.prototype.animate && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
   document.documentElement.classList.add('entry-pending');
   window.__entryFallback = setTimeout(function () {
-    document.documentElement.classList.remove('entry-pending');
+    if (window.__entryAbort) window.__entryAbort();
+    else document.documentElement.classList.remove('entry-pending');
   }, 5000);
 }
 </script>
@@ -608,11 +609,14 @@ html.entry-pending .portrait{ transform:translate3d(0,16px,0) scale(.985); }
     reduce.removeEventListener('change', onMotionChange);
     document.documentElement.classList.remove('entry-pending');
     animations.forEach(function (animation) { animation.cancel(); });
+    delete window.__entryAbort;
   }
 
   function onMotionChange(event) {
     if (event.matches) cleanUp();
   }
+
+  window.__entryAbort = cleanUp;
 
   function add(selector, from, delay, duration) {
     var element = document.querySelector(selector);
